@@ -1,3 +1,18 @@
-streamlit
-numpy
-scikit-learn
+Django>=5.2,<6.0
+Pillow>=10.0
+
+# Serveur de production et fichiers statiques
+gunicorn>=22.0
+whitenoise>=6.6
+
+# Assistant / chatbot (appels à l'API LLM : OpenRouter ou LM Studio)
+requests>=2.31
+
+# Extraction intelligente des documents scannés (optionnel : nécessite le
+# binaire Tesseract OCR installé sur le serveur - apt install tesseract-ocr).
+# L'application fonctionne sans ces dépendances (saisie manuelle uniquement).
+pytesseract>=0.3.10
+pdf2image>=1.17.0
+
+# Base de données de production recommandée (voir DATABASE_ENGINE dans .env)
+psycopg2-binary>=2.9

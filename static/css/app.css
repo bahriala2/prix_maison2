@@ -1,0 +1,52 @@
+body {
+    background-color: #f5f6f8;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card .stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.table-responsive {
+    background: #fff;
+    border-radius: .5rem;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"] {
+    display: block;
+    width: 100%;
+    padding: .375rem .75rem;
+    border: 1px solid #ced4da;
+    border-radius: .375rem;
+}
+
+/* Impression : ne garder que les tableaux et titres */
+@media print {
+    .navbar,
+    .zone-boutons button,
+    .zone-boutons a,
+    .no-print,
+    tr.filtres,
+    noscript,
+    .alert {
+        display: none !important;
+    }
+    body {
+        background: #fff;
+    }
+    .table-responsive {
+        overflow: visible;
+        box-shadow: none;
+    }
+    a {
+        text-decoration: none;
+        color: #000;
+    }
+}

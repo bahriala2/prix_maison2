@@ -1,0 +1,11 @@
+.git
+__pycache__
+*.pyc
+db.sqlite3
+media
+staticfiles
+venv
+.env
+linear_regression.joblib
+streamlit_app.py.py
+packages.txt

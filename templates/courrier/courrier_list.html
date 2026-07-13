@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ titre }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 zone-boutons">
+  <h2>{{ titre }}</h2>
+  <div>
+    <button onclick="window.print()" class="btn btn-outline-secondary">🖨 Imprimer</button>
+    <a href="{% url 'courrier:create' %}?type={{ type_courrier }}" class="btn btn-primary">
+      + Nouveau courrier {% if est_entrant %}entrant{% else %}sortant{% endif %}
+    </a>
+  </div>
+</div>
+
+<form method="get" id="filtres-form">
+<div class="table-responsive">
+<table class="table table-hover align-middle" id="table-courriers">
+  <thead>
+    <tr>
+      <th>N° d'ordre</th><th>Objet</th><th>Émetteur</th><th>Récepteur</th>
+      <th>Référence</th><th>Service</th><th>Statut</th><th>Urgence</th><th>Date</th>
+    </tr>
+    <tr class="filtres">
+      <th><input type="search" name="numero" value="{{ filtres.numero|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="objet" value="{{ filtres.objet|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="emetteur" value="{{ filtres.emetteur|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="recepteur" value="{{ filtres.recepteur|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="reference" value="{{ filtres.reference|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="service" value="{{ filtres.service|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th>
+        <select name="statut" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Tous</option>
+          {% for value, label in statuts %}
+          <option value="{{ value }}" {% if value == filtres.statut %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </th>
+      <th></th>
+      <th><input type="date" name="date" value="{{ filtres.date|default:'' }}" class="form-control form-control-sm" onchange="this.form.submit()"></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in courriers %}
+    <tr class="ligne-courrier" data-href="{% url 'courrier:detail' c.pk %}" style="cursor:pointer">
+      <td>{{ c.numero_ordre }}</td>
+      <td>{{ c.objet }}</td>
+      <td>{{ c.emetteur }}</td>
+      <td>{{ c.recepteur }}</td>
+      <td>{{ c.reference_externe|default:"—" }}</td>
+      <td>{{ c.service|default:"—" }}</td>
+      <td><span class="badge bg-secondary">{{ c.get_statut_display }}</span></td>
+      <td>{% if c.urgence == "URGENT" %}<span class="badge bg-danger">Urgent</span>{% else %}Normal{% endif %}</td>
+      <td>{{ c.date_courrier|date:"d/m/Y" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="9" class="text-center text-muted">Aucun courrier trouvé</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<noscript><button class="btn btn-outline-secondary">Rechercher</button></noscript>
+</form>
+
+<script>
+// Lignes cliquables → page de détail
+document.querySelectorAll(".ligne-courrier").forEach(function (tr) {
+  tr.addEventListener("click", function () { window.location = tr.dataset.href; });
+});
+
+// Filtrage immédiat côté client pendant la saisie ; la touche Entrée lance
+// la recherche complète côté serveur (soumission native du formulaire).
+document.querySelectorAll(".col-filter").forEach(function (input) {
+  input.addEventListener("input", function () {
+    var colonne = input.closest("th").cellIndex;
+    var valeur = input.value.toLowerCase();
+    document.querySelectorAll("#table-courriers tbody tr.ligne-courrier").forEach(function (tr) {
+      var cellule = tr.cells[colonne].textContent.toLowerCase();
+      tr.style.display = cellule.indexOf(valeur) === -1 ? "none" : "";
+    });
+  });
+});
+</script>
+{% endblock %}

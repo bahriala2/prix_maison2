@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Marchés{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 zone-boutons">
+  <h2>Marchés et achats</h2>
+  <div>
+    <button onclick="window.print()" class="btn btn-outline-secondary">🖨 Imprimer</button>
+    <a href="{% url 'marches:create' %}" class="btn btn-primary">+ Nouveau marché</a>
+  </div>
+</div>
+
+<form method="get" id="filtres-form">
+<div class="table-responsive">
+<table class="table table-hover align-middle" id="table-marches">
+  <thead>
+    <tr><th>Référence</th><th>Objet</th><th>Procédure</th><th>Fournisseur</th><th>Montant</th><th>Statut</th></tr>
+    <tr class="filtres">
+      <th><input type="search" name="reference" value="{{ filtres.reference|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="objet" value="{{ filtres.objet|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th>
+        <select name="procedure" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Toutes</option>
+          {% for value, label in procedures %}
+          <option value="{{ value }}" {% if value == filtres.procedure %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </th>
+      <th><input type="search" name="fournisseur" value="{{ filtres.fournisseur|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th></th>
+      <th>
+        <select name="statut" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Tous</option>
+          {% for value, label in statuts %}
+          <option value="{{ value }}" {% if value == filtres.statut %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for m in marches %}
+    <tr class="ligne-marche" data-href="{% url 'marches:detail' m.pk %}" style="cursor:pointer">
+      <td>{{ m.reference }}</td>
+      <td>{{ m.objet }}</td>
+      <td>{{ m.get_type_procedure_display }}</td>
+      <td>{{ m.fournisseur|default:"—" }}</td>
+      <td>{{ m.montant|default:"—" }}</td>
+      <td><span class="badge bg-secondary">{{ m.get_statut_display }}</span></td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="6" class="text-center text-muted">Aucun marché</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<noscript><button class="btn btn-outline-secondary">Rechercher</button></noscript>
+</form>
+
+<script>
+document.querySelectorAll(".ligne-marche").forEach(function (tr) {
+  tr.addEventListener("click", function () { window.location = tr.dataset.href; });
+});
+document.querySelectorAll(".col-filter").forEach(function (input) {
+  input.addEventListener("input", function () {
+    var colonne = input.closest("th").cellIndex;
+    var valeur = input.value.toLowerCase();
+    document.querySelectorAll("#table-marches tbody tr.ligne-marche").forEach(function (tr) {
+      var cellule = tr.cells[colonne].textContent.toLowerCase();
+      tr.style.display = cellule.indexOf(valeur) === -1 ? "none" : "";
+    });
+  });
+});
+</script>
+{% endblock %}

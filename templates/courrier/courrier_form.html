@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Nouveau courrier{% endblock %}
+{% block content %}
+<h2 class="mb-4">Nouveau courrier</h2>
+
+<div class="row">
+  <div class="col-md-5">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">1. Scan intelligent (optionnel)</h5>
+        <p class="text-muted small">
+          Importez le document scanné : le système tentera d'en extraire automatiquement l'objet,
+          l'émetteur, le récepteur et un résumé. Vérifiez toujours les champs proposés avant l'enregistrement.
+        </p>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          {{ scan_form.fichier }}
+          <button type="submit" name="analyser" class="btn btn-outline-primary mt-2">Analyser le document</button>
+        </form>
+        {% if extraction %}
+        <hr>
+        <p class="small mb-1"><strong>OCR disponible :</strong> {{ extraction.ocr_disponible|yesno:"Oui,Non" }}</p>
+        {% if extraction.texte_brut %}
+        <details class="small"><summary>Texte brut extrait</summary><pre class="small">{{ extraction.texte_brut|truncatechars:1000 }}</pre></details>
+        {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">2. Fiche du courrier</h5>
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <input type="hidden" name="fichier_reference" value="1">
+          <div class="row g-2">
+            <div class="col-md-6"><label class="form-label">Type</label>{{ form.type_courrier }}</div>
+            <div class="col-md-6"><label class="form-label">Date</label>{{ form.date_courrier }}</div>
+            <div class="col-md-6"><label class="form-label">Émetteur</label>{{ form.emetteur }}</div>
+            <div class="col-md-6"><label class="form-label">Récepteur</label>{{ form.recepteur }}</div>
+            <datalist id="liste-correspondants">
+              {% for c in correspondants %}<option value="{{ c.nom }}">{% endfor %}
+            </datalist>
+            <div class="col-12"><label class="form-label">Objet</label>{{ form.objet }}</div>
+            <div class="col-md-6"><label class="form-label">Référence</label>{{ form.reference_externe }}</div>
+            <div class="col-md-6"><label class="form-label">Urgence</label>{{ form.urgence }}</div>
+            <div class="col-md-6">
+              <label class="form-label">Pièce jointe</label>
+              <input type="file" name="fichier" class="form-control">
+            </div>
+            <div class="col-12"><label class="form-label">Résumé</label>{{ form.resume }}</div>
+            <div class="col-12"><label class="form-label">Remarque</label>{{ form.remarque }}</div>
+          </div>
+          <button type="submit" name="enregistrer" class="btn btn-primary mt-3">Enregistrer le courrier</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

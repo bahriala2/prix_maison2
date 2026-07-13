@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Nouveau marché{% endblock %}
+{% block content %}
+<h2 class="mb-4">Nouveau marché</h2>
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-2">
+        <div class="col-12"><label class="form-label">Objet</label>{{ form.objet }}</div>
+        <div class="col-md-6"><label class="form-label">Type de procédure</label>{{ form.type_procedure }}</div>
+        <div class="col-md-6"><label class="form-label">Service demandeur</label>{{ form.service_demandeur }}</div>
+        <div class="col-md-6"><label class="form-label">Demande d'achat liée</label>{{ form.demande_achat }}</div>
+        <div class="col-md-6"><label class="form-label">Fournisseur / attributaire</label>{{ form.fournisseur }}</div>
+        <div class="col-md-6"><label class="form-label">Montant</label>{{ form.montant }}</div>
+        <div class="col-md-6"><label class="form-label">Statut</label>{{ form.statut }}</div>
+        <div class="col-md-6"><label class="form-label">Date de lancement</label>{{ form.date_lancement }}</div>
+        <div class="col-md-6"><label class="form-label">Date d'attribution</label>{{ form.date_attribution }}</div>
+        <div class="col-md-6"><label class="form-label">Date de notification</label>{{ form.date_notification }}</div>
+        <div class="col-md-6"><label class="form-label">Date de clôture</label>{{ form.date_cloture }}</div>
+      </div>
+      <button type="submit" class="btn btn-primary mt-3">Créer le marché</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

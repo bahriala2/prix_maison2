@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Assistant{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>🤖 Assistant du bureau d'ordre</h2>
+      <form method="post" class="d-flex gap-2">
+        {% csrf_token %}
+        <button name="tester" value="1" class="btn btn-sm btn-outline-primary">Tester la clé</button>
+        <button name="effacer" value="1" class="btn btn-sm btn-outline-secondary">Effacer la conversation</button>
+      </form>
+    </div>
+    <p class="text-muted small">
+      Posez vos questions sur les courriers arrivés et envoyés, leur contenu, les demandes d'achat
+      et les marchés. Modèle : <code>{{ llm_model }}</code> ·
+      {% if mode_local %}
+      <span class="badge bg-info">LLM local ({{ llm_base_url }})</span>
+      {% elif cle_detectee %}
+      <span class="badge bg-success">Clé API détectée</span>
+      <span class="text-muted">{{ cle_masquee }} · {{ llm_base_url }}</span>
+      {% else %}
+      <span class="badge bg-danger">Clé API absente</span>
+      {% endif %}
+    </p>
+    {% if not cle_detectee and not mode_local %}
+    <div class="alert alert-warning small">
+      La variable d'environnement <code>OPENROUTER_API_KEY</code> n'est pas visible par l'application.
+      Sur Render : service → <strong>Environment</strong> → « Add Environment Variable » →
+      Key = <code>OPENROUTER_API_KEY</code> (exactement, en majuscules, sans espaces ni guillemets),
+      Value = votre clé → <strong>Save Changes</strong>, puis attendez la fin du redéploiement automatique.
+    </div>
+    {% endif %}
+
+    <div class="card mb-3">
+      <div class="card-body" id="zone-messages" style="max-height: 55vh; overflow-y: auto;">
+        {% for m in historique %}
+          {% if m.role == "user" %}
+          <div class="d-flex justify-content-end mb-2">
+            <div class="p-2 px-3 rounded-3 bg-primary text-white" style="max-width: 80%;">{{ m.contenu|linebreaksbr }}</div>
+          </div>
+          {% else %}
+          <div class="d-flex justify-content-start mb-2">
+            <div class="p-2 px-3 rounded-3 bg-light border" style="max-width: 80%;">{{ m.contenu|linebreaksbr }}</div>
+          </div>
+          {% endif %}
+        {% empty %}
+        <div class="text-center text-muted py-4">
+          <p class="mb-1">Aucune conversation. Exemples de questions :</p>
+          <p class="small mb-0">« Quels sont les courriers urgents en attente ? »<br>
+          « Avons-nous reçu un courrier de la municipalité ce mois-ci ? »<br>
+          « Où en est le marché de matériel informatique ? »<br>
+          « Combien de demandes d'achat attendent la signature du directeur ? »</p>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <form method="post" class="d-flex gap-2">
+      {% csrf_token %}
+      <input type="text" name="question" class="form-control" placeholder="Votre question..." autofocus required>
+      <button type="submit" class="btn btn-primary">Envoyer</button>
+    </form>
+  </div>
+</div>
+
+<script>
+var zone = document.getElementById("zone-messages");
+if (zone) { zone.scrollTop = zone.scrollHeight; }
+</script>
+{% endblock %}

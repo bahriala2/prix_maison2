@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<h2 class="mb-4">Tableau de bord</h2>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Courriers entrants</div>
+      <div class="stat-value">{{ courriers_entrants }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Courriers sortants</div>
+      <div class="stat-value">{{ courriers_sortants }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Courriers en attente</div>
+      <div class="stat-value">{{ courriers_en_attente }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Dossiers en retard</div>
+      <div class="stat-value text-danger">{{ dossiers_en_retard }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Demandes signées non transmises</div>
+      <div class="stat-value">{{ demandes_signees_non_transmises }}</div>
+      <a href="{% url 'achats:signees_bo' %}" class="small">Voir la liste →</a>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Demandes en cours de traitement</div>
+      <div class="stat-value">{{ demandes_en_cours }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Marchés en cours</div>
+      <div class="stat-value">{{ marches_en_cours }}</div>
+    </div></div>
+  </div>
+  <div class="col-md-3">
+    <div class="card stat-card"><div class="card-body">
+      <div class="text-muted">Services actifs</div>
+      <div class="stat-value">{{ total_services }}</div>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title">Répartition des courriers par service</h5>
+      <table class="table table-sm">
+        <tbody>
+        {% for row in repartition_service %}
+          <tr><td>{{ row.service__nom|default:"Non défini" }}</td><td class="text-end">{{ row.total }}</td></tr>
+        {% empty %}
+          <tr><td class="text-muted">Aucune donnée</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title">Répartition des courriers par statut</h5>
+      <table class="table table-sm">
+        <tbody>
+        {% for row in repartition_statut %}
+          <tr><td>{{ row.statut }}</td><td class="text-end">{{ row.total }}</td></tr>
+        {% empty %}
+          <tr><td class="text-muted">Aucune donnée</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div></div>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-md-6">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title text-danger">Alertes : courriers en retard (&gt; {{ RETARD_JOURS_COURRIER }} jours)</h5>
+      <ul class="list-group list-group-flush">
+        {% for c in courriers_retard %}
+          <li class="list-group-item"><a href="{% url 'courrier:detail' c.pk %}">{{ c.numero_ordre }} — {{ c.objet }}</a></li>
+        {% empty %}
+          <li class="list-group-item text-muted">Aucun courrier en retard</li>
+        {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+  <div class="col-md-6">
+    <div class="card"><div class="card-body">
+      <h5 class="card-title text-danger">Alertes : demandes d'achat en retard</h5>
+      <ul class="list-group list-group-flush">
+        {% for d in demandes_retard %}
+          <li class="list-group-item"><a href="{% url 'achats:detail' d.pk %}">{{ d.reference }} — {{ d.objet }}</a></li>
+        {% empty %}
+          <li class="list-group-item text-muted">Aucune demande en retard</li>
+        {% endfor %}
+      </ul>
+    </div></div>
+  </div>
+</div>
+{% endblock %}

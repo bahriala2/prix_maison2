@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}Demandes d'achat{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3 zone-boutons">
+  <h2>Demandes d'achat</h2>
+  <div>
+    <button onclick="window.print()" class="btn btn-outline-secondary">🖨 Imprimer</button>
+    <a href="{% url 'achats:create' %}" class="btn btn-primary">+ Nouvelle demande</a>
+  </div>
+</div>
+
+<form method="get" id="filtres-form">
+<div class="table-responsive">
+<table class="table table-hover align-middle" id="table-demandes">
+  <thead>
+    <tr><th>Référence</th><th>Objet</th><th>Circuit</th><th>Service</th><th>Type</th><th>Montant</th><th>Statut</th><th>N° BO</th></tr>
+    <tr class="filtres">
+      <th><input type="search" name="reference" value="{{ filtres.reference|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th><input type="search" name="objet" value="{{ filtres.objet|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th>
+        <select name="circuit" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Tous</option>
+          {% for value, label in circuits %}
+          <option value="{{ value }}" {% if value == filtres.circuit %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </th>
+      <th><input type="search" name="service" value="{{ filtres.service|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+      <th>
+        <select name="type_achat" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Tous</option>
+          {% for value, label in types_achat %}
+          <option value="{{ value }}" {% if value == filtres.type_achat %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </th>
+      <th></th>
+      <th>
+        <select name="statut" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">Tous</option>
+          {% for value, label in statuts %}
+          <option value="{{ value }}" {% if value == filtres.statut %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </th>
+      <th><input type="search" name="numero_bo" value="{{ filtres.numero_bo|default:'' }}" class="form-control form-control-sm col-filter" placeholder="Rechercher..."></th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in demandes %}
+    <tr class="ligne-demande" data-href="{% url 'achats:detail' d.pk %}" style="cursor:pointer">
+      <td>{{ d.reference }}</td>
+      <td>{{ d.objet }}</td>
+      <td>
+        {% if d.circuit == "LOCALE" %}
+        <span class="badge bg-success">Locale</span>
+        {% else %}
+        <span class="badge bg-primary">Avec accords</span>
+        {% endif %}
+      </td>
+      <td>{{ d.service_demandeur }}</td>
+      <td>{{ d.get_type_achat_display }}</td>
+      <td>{{ d.montant_estimatif|default:"—" }}</td>
+      <td><span class="badge bg-secondary">{{ d.get_statut_display }}</span></td>
+      <td>{{ d.numero_ordre_bo|default:"—" }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="8" class="text-center text-muted">Aucune demande</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+<noscript><button class="btn btn-outline-secondary">Rechercher</button></noscript>
+</form>
+
+<script>
+document.querySelectorAll(".ligne-demande").forEach(function (tr) {
+  tr.addEventListener("click", function () { window.location = tr.dataset.href; });
+});
+document.querySelectorAll(".col-filter").forEach(function (input) {
+  input.addEventListener("input", function () {
+    var colonne = input.closest("th").cellIndex;
+    var valeur = input.value.toLowerCase();
+    document.querySelectorAll("#table-demandes tbody tr.ligne-demande").forEach(function (tr) {
+      var cellule = tr.cells[colonne].textContent.toLowerCase();
+      tr.style.display = cellule.indexOf(valeur) === -1 ? "none" : "";
+    });
+  });
+});
+</script>
+{% endblock %}

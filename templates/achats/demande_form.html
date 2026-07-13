@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Nouvelle demande d'achat{% endblock %}
+{% block content %}
+<h2 class="mb-4">Nouvelle demande d'achat</h2>
+<div class="card">
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      <div class="row g-2">
+        <div class="col-12">
+          <label class="form-label">Circuit de validation</label>{{ form.circuit }}
+          <div class="form-text">
+            « Avec accords » : la demande passe par la DCP et les autres directions avant la signature du directeur.
+            « Locale » : seule la signature du directeur est requise.
+          </div>
+        </div>
+        <div class="col-md-6"><label class="form-label">Service demandeur</label>{{ form.service_demandeur }}</div>
+        <div class="col-md-6"><label class="form-label">Type d'achat</label>{{ form.type_achat }}</div>
+        <div class="col-12"><label class="form-label">Objet</label>{{ form.objet }}</div>
+        <div class="col-12"><label class="form-label">Description du besoin</label>{{ form.description }}</div>
+        <div class="col-md-6"><label class="form-label">Montant estimatif</label>{{ form.montant_estimatif }}</div>
+        <div class="col-md-6"><label class="form-label">Date de création</label>{{ form.date_creation }}</div>
+      </div>
+      <button type="submit" class="btn btn-primary mt-3">Créer la demande</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

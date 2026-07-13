@@ -1,0 +1,49 @@
+# Blueprint Render : déploiement en un clic depuis le dépôt GitHub.
+# https://render.com/docs/blueprints
+services:
+  - type: web
+    name: dtpcsso
+    # Runtime Docker : le runtime Python natif de Render ne permet pas
+    # d'installer des paquets système (tesseract-ocr, poppler-utils)
+    # nécessaires à l'analyse OCR des documents scannés.
+    runtime: docker
+    plan: free
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "*"
+      # Assistant / chatbot : renseigner la clé dans le tableau de bord Render
+      # (Environment) — sync: false évite de la stocker dans le dépôt.
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        value: "meta-llama/llama-3.3-70b-instruct:free"
+      - key: DATABASE_ENGINE
+        value: postgresql
+      - key: DATABASE_NAME
+        fromDatabase:
+          name: bureau-d-ordre-db
+          property: database
+      - key: DATABASE_USER
+        fromDatabase:
+          name: bureau-d-ordre-db
+          property: user
+      - key: DATABASE_PASSWORD
+        fromDatabase:
+          name: bureau-d-ordre-db
+          property: password
+      - key: DATABASE_HOST
+        fromDatabase:
+          name: bureau-d-ordre-db
+          property: host
+      - key: DATABASE_PORT
+        fromDatabase:
+          name: bureau-d-ordre-db
+          property: port
+
+databases:
+  - name: bureau-d-ordre-db
+    plan: free

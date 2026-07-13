@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}{{ courrier.numero_ordre }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">{{ courrier.numero_ordre }} — {{ courrier.objet }}</h2>
+<p class="text-muted">{{ courrier.get_type_courrier_display }} · {{ courrier.date_courrier }}</p>
+
+<div class="row g-3">
+  <div class="col-md-7">
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Informations</h5>
+        <dl class="row mb-0">
+          <dt class="col-sm-4">Émetteur</dt><dd class="col-sm-8">{{ courrier.emetteur }}</dd>
+          <dt class="col-sm-4">Récepteur</dt><dd class="col-sm-8">{{ courrier.recepteur }}</dd>
+          <dt class="col-sm-4">Service</dt><dd class="col-sm-8">{{ courrier.service|default:"—" }}</dd>
+          <dt class="col-sm-4">Référence</dt><dd class="col-sm-8">{{ courrier.reference_externe|default:"—" }}</dd>
+          <dt class="col-sm-4">Urgence</dt><dd class="col-sm-8">{{ courrier.get_urgence_display }}</dd>
+          <dt class="col-sm-4">Résumé</dt><dd class="col-sm-8">{{ courrier.resume|default:"—" }}</dd>
+          <dt class="col-sm-4">Remarque</dt><dd class="col-sm-8">{{ courrier.remarque|default:"—"|linebreaksbr }}</dd>
+          <dt class="col-sm-4">Créé par</dt><dd class="col-sm-8">{{ courrier.created_by }}</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Documents</h5>
+        <ul class="list-group list-group-flush">
+          {% for doc in documents %}
+          <li class="list-group-item"><a href="{{ doc.fichier.url }}" target="_blank">{{ doc.nom }}</a></li>
+          {% empty %}
+          <li class="list-group-item text-muted">Aucun document</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Correspondances liées</h5>
+        <ul class="list-group list-group-flush mb-3">
+          {% for lie in courriers_lies %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              <a href="{% url 'courrier:detail' lie.pk %}">{{ lie.numero_ordre }}</a>
+              — {{ lie.objet }}
+              <span class="badge {% if lie.type_courrier == 'ENTRANT' %}bg-info{% else %}bg-warning text-dark{% endif %}">{{ lie.get_type_courrier_display }}</span>
+              <small class="text-muted">{{ lie.date_courrier|date:"d/m/Y" }}</small>
+            </span>
+            <form method="post" class="ms-2">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="delier">
+              <input type="hidden" name="courrier_cible" value="{{ lie.pk }}">
+              <button class="btn btn-sm btn-outline-danger" title="Supprimer la liaison">×</button>
+            </form>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">Aucune correspondance liée manuellement</li>
+          {% endfor %}
+        </ul>
+
+        <h6>Correspondances similaires détectées (même thème, référence ou interlocuteur)</h6>
+        <ul class="list-group list-group-flush">
+          {% for s in similaires %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <span>
+              <a href="{% url 'courrier:detail' s.pk %}">{{ s.numero_ordre }}</a>
+              — {{ s.objet }}
+              <span class="badge {% if s.type_courrier == 'ENTRANT' %}bg-info{% else %}bg-warning text-dark{% endif %}">{{ s.get_type_courrier_display }}</span>
+              <small class="text-muted">{{ s.date_courrier|date:"d/m/Y" }}</small>
+            </span>
+            <form method="post" class="ms-2">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="lier">
+              <input type="hidden" name="courrier_cible" value="{{ s.pk }}">
+              <button class="btn btn-sm btn-outline-primary" title="Lier cette correspondance">Lier</button>
+            </form>
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">Aucune correspondance similaire trouvée</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Historique des actions</h5>
+        <ul class="list-group list-group-flush">
+          {% for h in historique %}
+          <li class="list-group-item">
+            <strong>{{ h.action }}</strong> — {{ h.user }} — {{ h.date_action }}
+            {% if h.commentaire %}<div class="small text-muted">{{ h.commentaire }}</div>{% endif %}
+          </li>
+          {% empty %}
+          <li class="list-group-item text-muted">Aucun historique</li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Statut : <span class="badge bg-secondary">{{ courrier.get_statut_display }}</span></h5>
+        <form method="post">
+          {% csrf_token %}
+          <label class="form-label">Nouveau statut</label>
+          {{ statut_form.statut }}
+          <label class="form-label mt-2">Commentaire</label>
+          {{ statut_form.commentaire }}
+          <button type="submit" class="btn btn-primary mt-3">Mettre à jour le statut</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

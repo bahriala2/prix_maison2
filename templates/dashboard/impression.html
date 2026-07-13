@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Impression des listes{% endblock %}
+{% block content %}
+<div class="zone-boutons">
+  <h2 class="mb-3">🖨 Impression des listes</h2>
+
+  <form method="get" class="card mb-4 no-print">
+    <div class="card-body">
+      <p class="mb-2">Choisissez les listes à imprimer :</p>
+      {% for code, label in sections.items %}
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" name="sections" value="{{ code }}"
+               id="section-{{ code }}" {% if code in choisies %}checked{% endif %}>
+        <label class="form-check-label" for="section-{{ code }}">{{ label }}</label>
+      </div>
+      {% endfor %}
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary">Afficher</button>
+        {% if donnees %}
+        <button type="button" onclick="window.print()" class="btn btn-outline-secondary">🖨 Imprimer</button>
+        {% endif %}
+      </div>
+    </div>
+  </form>
+</div>
+
+{% if donnees.entrants is not None %}
+<h3>Courriers arrivée ({{ donnees.entrants|length }})</h3>
+<table class="table table-sm table-bordered mb-4">
+  <thead><tr><th>N° d'ordre</th><th>Date</th><th>Émetteur</th><th>Récepteur</th><th>Objet</th><th>Référence</th><th>Statut</th></tr></thead>
+  <tbody>
+    {% for c in donnees.entrants %}
+    <tr><td>{{ c.numero_ordre }}</td><td>{{ c.date_courrier|date:"d/m/Y" }}</td><td>{{ c.emetteur }}</td><td>{{ c.recepteur }}</td><td>{{ c.objet }}</td><td>{{ c.reference_externe|default:"—" }}</td><td>{{ c.get_statut_display }}</td></tr>
+    {% empty %}<tr><td colspan="7" class="text-muted">Aucun courrier</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if donnees.sortants is not None %}
+<h3>Courriers départ ({{ donnees.sortants|length }})</h3>
+<table class="table table-sm table-bordered mb-4">
+  <thead><tr><th>N° d'ordre</th><th>Date</th><th>Émetteur</th><th>Récepteur</th><th>Objet</th><th>Référence</th><th>Statut</th></tr></thead>
+  <tbody>
+    {% for c in donnees.sortants %}
+    <tr><td>{{ c.numero_ordre }}</td><td>{{ c.date_courrier|date:"d/m/Y" }}</td><td>{{ c.emetteur }}</td><td>{{ c.recepteur }}</td><td>{{ c.objet }}</td><td>{{ c.reference_externe|default:"—" }}</td><td>{{ c.get_statut_display }}</td></tr>
+    {% empty %}<tr><td colspan="7" class="text-muted">Aucun courrier</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if donnees.da_locales is not None %}
+<h3>Demandes d'achat locales ({{ donnees.da_locales|length }})</h3>
+<table class="table table-sm table-bordered mb-4">
+  <thead><tr><th>Référence</th><th>Objet</th><th>Service</th><th>Type</th><th>Montant</th><th>Statut</th><th>N° BO</th></tr></thead>
+  <tbody>
+    {% for d in donnees.da_locales %}
+    <tr><td>{{ d.reference }}</td><td>{{ d.objet }}</td><td>{{ d.service_demandeur }}</td><td>{{ d.get_type_achat_display }}</td><td>{{ d.montant_estimatif|default:"—" }}</td><td>{{ d.get_statut_display }}</td><td>{{ d.numero_ordre_bo|default:"—" }}</td></tr>
+    {% empty %}<tr><td colspan="7" class="text-muted">Aucune demande</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if donnees.da_accords is not None %}
+<h3>Demandes d'achat avec accords ({{ donnees.da_accords|length }})</h3>
+<table class="table table-sm table-bordered mb-4">
+  <thead><tr><th>Référence</th><th>Objet</th><th>Service</th><th>Type</th><th>Montant</th><th>Statut</th><th>N° BO</th></tr></thead>
+  <tbody>
+    {% for d in donnees.da_accords %}
+    <tr><td>{{ d.reference }}</td><td>{{ d.objet }}</td><td>{{ d.service_demandeur }}</td><td>{{ d.get_type_achat_display }}</td><td>{{ d.montant_estimatif|default:"—" }}</td><td>{{ d.get_statut_display }}</td><td>{{ d.numero_ordre_bo|default:"—" }}</td></tr>
+    {% empty %}<tr><td colspan="7" class="text-muted">Aucune demande</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+
+{% if donnees.marches is not None %}
+<h3>Marchés ({{ donnees.marches|length }})</h3>
+<table class="table table-sm table-bordered mb-4">
+  <thead><tr><th>Référence</th><th>Objet</th><th>Procédure</th><th>Fournisseur</th><th>Montant</th><th>Statut</th></tr></thead>
+  <tbody>
+    {% for m in donnees.marches %}
+    <tr><td>{{ m.reference }}</td><td>{{ m.objet }}</td><td>{{ m.get_type_procedure_display }}</td><td>{{ m.fournisseur|default:"—" }}</td><td>{{ m.montant|default:"—" }}</td><td>{{ m.get_statut_display }}</td></tr>
+    {% empty %}<tr><td colspan="6" class="text-muted">Aucun marché</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

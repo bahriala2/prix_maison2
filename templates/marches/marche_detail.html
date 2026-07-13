@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}{{ marche.reference }}{% endblock %}
+{% block content %}
+<h2 class="mb-1">{{ marche.reference }} — {{ marche.objet }}</h2>
+<p class="text-muted">{{ marche.get_type_procedure_display }} · {{ marche.service_demandeur }}</p>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title">Statut : <span class="badge bg-secondary">{{ marche.get_statut_display }}</span></h5>
+    <dl class="row mb-0">
+      <dt class="col-sm-3">Fournisseur</dt><dd class="col-sm-9">{{ marche.fournisseur|default:"—" }}</dd>
+      <dt class="col-sm-3">Montant</dt><dd class="col-sm-9">{{ marche.montant|default:"—" }}</dd>
+      <dt class="col-sm-3">Demande d'achat liée</dt><dd class="col-sm-9">{{ marche.demande_achat|default:"—" }}</dd>
+      <dt class="col-sm-3">Date de lancement</dt><dd class="col-sm-9">{{ marche.date_lancement|default:"—" }}</dd>
+      <dt class="col-sm-3">Date d'attribution</dt><dd class="col-sm-9">{{ marche.date_attribution|default:"—" }}</dd>
+      <dt class="col-sm-3">Date de notification</dt><dd class="col-sm-9">{{ marche.date_notification|default:"—" }}</dd>
+      <dt class="col-sm-3">Date de clôture</dt><dd class="col-sm-9">{{ marche.date_cloture|default:"—" }}</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title">Documents</h5>
+    <ul class="list-group list-group-flush">
+      {% for doc in documents %}
+      <li class="list-group-item"><a href="{{ doc.fichier.url }}" target="_blank">{{ doc.nom }}</a></li>
+      {% empty %}
+      <li class="list-group-item text-muted">Aucun document</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Marchés liés</h5>
+    <ul class="list-group list-group-flush mb-3">
+      {% for lie in marches_lies %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          <a href="{% url 'marches:detail' lie.pk %}">{{ lie.reference }}</a>
+          — {{ lie.objet }}
+          <span class="badge bg-secondary">{{ lie.get_statut_display }}</span>
+        </span>
+        <form method="post" class="ms-2">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="delier">
+          <input type="hidden" name="marche_cible" value="{{ lie.pk }}">
+          <button class="btn btn-sm btn-outline-danger" title="Supprimer la liaison">×</button>
+        </form>
+      </li>
+      {% empty %}
+      <li class="list-group-item text-muted">Aucun marché lié manuellement</li>
+      {% endfor %}
+    </ul>
+
+    <h6>Marchés similaires détectés (même thème ou fournisseur)</h6>
+    <ul class="list-group list-group-flush">
+      {% for s in similaires %}
+      <li class="list-group-item d-flex justify-content-between align-items-center">
+        <span>
+          <a href="{% url 'marches:detail' s.pk %}">{{ s.reference }}</a>
+          — {{ s.objet }}
+          <span class="badge bg-secondary">{{ s.get_statut_display }}</span>
+        </span>
+        <form method="post" class="ms-2">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="lier">
+          <input type="hidden" name="marche_cible" value="{{ s.pk }}">
+          <button class="btn btn-sm btn-outline-primary" title="Lier ce marché">Lier</button>
+        </form>
+      </li>
+      {% empty %}
+      <li class="list-group-item text-muted">Aucun marché similaire trouvé</li>
+      {% endfor %}
+    </ul>
+  </div>
+</div>
+{% endblock %}
